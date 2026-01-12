@@ -1,0 +1,18 @@
+{
+    "name": "larissakovask-bot",
+    "version": "1.0.0",
+    "description": "Bot Telegram com Integração de Pagamentos e MongoDB",
+    "main": "index.js",
+    "scripts": {
+        "start": "node index.js"
+    },
+    "dependencies": {
+        "telegraf": "^4.16.3",
+        "mongoose": "^8.0.0",
+        "dotenv": "^16.4.5",
+        "node-fetch": "^2.7.0"
+    },
+    "engines": {
+        "node": ">=18.0.0"
+    }
+}
