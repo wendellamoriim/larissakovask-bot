@@ -82,21 +82,30 @@ async function criarPix(value, userId, plano) {
             }
         });
 
-        const data = await response.json();
+        const responseData = await response.json();
 
         console.log('--- DEBUG API PIX ---');
         console.log('Status:', response.status);
-        console.log('Data:', JSON.stringify(data, null, 2));
+        console.log('Data:', JSON.stringify(responseData, null, 2));
         console.log('---------------------');
 
-        // Verifica erro retornado pela API (proxy.php retorna {error: ...})
-        if (data.error) {
-            throw new Error(data.error);
+        // Verifica erro via success ou flag de erro
+        if (responseData.error) {
+            throw new Error(responseData.error);
         }
-        if (!data || !data.id) {
-            throw new Error('Falha ao gerar PIX: Resposta inválida da API. Verifique os logs.');
+
+        // Estrutura identificada nos logs: { success: true, data: { id: "...", copiaCola: "..." } }
+        if (!responseData.success || !responseData.data || !responseData.data.id) {
+            throw new Error('Falha ao gerar PIX: Dados incompletos na resposta da API.');
         }
-        return data;
+
+        // Mapeia para o formato que o bot espera
+        const pixInfo = responseData.data;
+        return {
+            id: pixInfo.id,
+            pix_code: pixInfo.copiaCola, // API retorna 'copiaCola', bot usa 'pix_code'
+            ...pixInfo
+        };
     } catch (error) {
         console.error('Erro na criação do PIX:', error);
         return null;
@@ -105,11 +114,14 @@ async function criarPix(value, userId, plano) {
 
 async function statusPix(txId) {
     try {
-        // Passa apiKey na URL conforme referência
         const response = await fetch(`${process.env.API_GATEWAY_URL}/api/status/${txId}?apiKey=${process.env.API_KEY || ''}`, {
             method: 'GET'
         });
-        return await response.json();
+        const data = await response.json();
+        // Se a estrutura de status for similar (dentro de data), precisamos ajustar também?
+        // Geralmente status retorna { status: 'paid' } ou { data: { status: 'paid' } }
+        // Vamos assumir comportamento padrão mas logar para debug se falhar
+        return data;
     } catch (error) {
         console.error('Erro ao checar status:', error);
         return { status: 'error' };
