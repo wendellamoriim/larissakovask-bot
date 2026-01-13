@@ -2,6 +2,7 @@ require('dotenv').config();
 const { Telegraf, Markup } = require('telegraf');
 const mongoose = require('mongoose');
 const fetch = require('node-fetch');
+const http = require('http'); // Adicionado para manter o Render feliz
 
 // --- 1. Configuração do Banco de Dados (MongoDB) ---
 mongoose.connect(process.env.MONGO_URI || '', {
@@ -195,6 +196,17 @@ function enviarAcessoVip(ctx) {
         ])
     );
 }
+
+// --- 5. Servidor HTTP para o Render (Health Check) ---
+// O Render exige que um serviço Web escute em uma porta, senão ele acha que falhou.
+const PORT = process.env.PORT || 3000;
+http.createServer((req, res) => {
+    res.writeHead(200, { 'Content-Type': 'text/plain' });
+    res.write('Bot esta online e rodando!');
+    res.end();
+}).listen(PORT, () => {
+    console.log(`✅ Servidor HTTP rodando na porta ${PORT} para o Render.`);
+});
 
 // Iniciar bot
 bot.launch().then(() => {
