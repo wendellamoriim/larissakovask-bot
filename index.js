@@ -83,12 +83,18 @@ async function criarPix(value, userId, plano) {
         });
 
         const data = await response.json();
+
+        console.log('--- DEBUG API PIX ---');
+        console.log('Status:', response.status);
+        console.log('Data:', JSON.stringify(data, null, 2));
+        console.log('---------------------');
+
         // Verifica erro retornado pela API (proxy.php retorna {error: ...})
         if (data.error) {
             throw new Error(data.error);
         }
         if (!data || !data.id) {
-            throw new Error('Falha ao gerar PIX: Resposta inválida da API');
+            throw new Error('Falha ao gerar PIX: Resposta inválida da API. Verifique os logs.');
         }
         return data;
     } catch (error) {
